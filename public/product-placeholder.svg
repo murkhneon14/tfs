@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 900" fill="none">
+  <rect width="800" height="900" fill="#efe7df"/>
+  <circle cx="400" cy="360" r="190" fill="#f8f3ed"/>
+  <path d="M288 365h224l-22 245H310l-22-245Z" fill="#f11d0d"/>
+  <path d="m340 365 20-90h80l20 90" stroke="#151311" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M350 435h100M350 475h70" stroke="#efe7df" stroke-width="14" stroke-linecap="round"/>
+  <path d="M400 520v45m-22-22h44" stroke="#efe7df" stroke-width="16" stroke-linecap="round"/>
+  <text x="400" y="710" fill="#756c65" font-family="Arial,sans-serif" font-size="20" letter-spacing="4" text-anchor="middle">THE FAMILY STORE</text>
+  <text x="400" y="747" fill="#756c65" font-family="Arial,sans-serif" font-size="13" letter-spacing="2" text-anchor="middle">GOOD THINGS, CLOSE TO HOME</text>
+</svg>
