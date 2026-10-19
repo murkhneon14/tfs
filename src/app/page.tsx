@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import Link from "next/link";
 import { products, type Product } from "@/data/products";
 
 type Cart = Record<string, number>;
@@ -17,10 +18,55 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState("");
   const [theme, setTheme] = useState<StoreTheme>("market");
+  const [currentUser, setCurrentUser] = useState<{ id: string; name: string; email: string; role: string } | null>(null);
+  const [cartLoaded, setCartLoaded] = useState(false);
 
   useEffect(() => {
     document.body.dataset.theme = theme;
   }, [theme]);
+
+  // 1. Restore shopping bag from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedCart = localStorage.getItem("tfs_cart");
+      if (savedCart) {
+        const parsed = JSON.parse(savedCart);
+        if (parsed && typeof parsed === "object") {
+          setCart(parsed);
+        }
+      }
+    } catch {}
+    setCartLoaded(true);
+  }, []);
+
+  // 2. Persist shopping bag to localStorage so cart survives login and page reloads
+  useEffect(() => {
+    if (!cartLoaded) return;
+    try {
+      localStorage.setItem("tfs_cart", JSON.stringify(cart));
+    } catch {}
+  }, [cart, cartLoaded]);
+
+  // 3. Auto-open bag if customer returns after login (e.g. /?checkout=1)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("checkout") === "1" || window.location.hash === "#bag") {
+        setBagOpen(true);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.authenticated && data.user) {
+          setCurrentUser(data.user);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const filtered = useMemo(() => products.filter((product) => `${product.name} ${product.category}`.toLowerCase().includes(query.toLowerCase())), [query]);
   const count = Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
@@ -58,6 +104,27 @@ export default function Home() {
     window.setTimeout(() => setToast(""), 1800);
   }
 
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setCurrentUser(null);
+      notify("Signed out successfully");
+    } catch {
+      notify("Error signing out");
+    }
+  }
+
+  function handleCheckout() {
+    if (!currentUser) {
+      notify("Please sign in to proceed with checkout");
+      window.setTimeout(() => {
+        window.location.href = "/login?redirect=" + encodeURIComponent("/?checkout=1");
+      }, 700);
+      return;
+    }
+    notify(`Hi ${currentUser.name.split(" ")[0]}! Checkout integration coming next.`);
+  }
+
   return (
     <main>
       <header className="topbar">
@@ -68,6 +135,19 @@ export default function Home() {
         <nav className="desktop-nav" aria-label="Main navigation">
           <button className={`nav-link ${!bagOpen ? "active" : ""}`} onClick={showShop}>Shop</button>
           <button className={`nav-link ${bagOpen ? "active" : ""}`} onClick={showBag}>Bag ({count})</button>
+          {currentUser ? (
+            <div className="user-nav-badge">
+              <Link className="user-nav-name" href="/account" title="View customer profile">
+                Hi, {currentUser.name.split(" ")[0]} ↗
+              </Link>
+              <button className="user-nav-logout" onClick={handleLogout} title="Log out of your account">Logout</button>
+            </div>
+          ) : (
+            <div className="nav-auth-cluster" role="group" aria-label="Customer account">
+              <Link className="nav-auth-btn" href="/login">Sign In</Link>
+              <Link className="nav-auth-btn nav-auth-btn-solid" href="/register">Sign Up <i>↗</i></Link>
+            </div>
+          )}
           <div className="theme-switch" role="group" aria-label="Choose a color theme">
             <button className={`theme-swatch swatch-ink ${theme === "ink" ? "selected" : ""}`} aria-label="Black on cream theme" aria-pressed={theme === "ink"} onClick={() => setTheme("ink")} />
             <button className={`theme-swatch swatch-market ${theme === "market" ? "selected" : ""}`} aria-label="Red on cream theme" aria-pressed={theme === "market"} onClick={() => setTheme("market")} />
@@ -77,7 +157,30 @@ export default function Home() {
         <button className="mobile-menu" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? "Close" : "Menu"}</button>
       </header>
 
-      {menuOpen && <div className="mobile-menu-panel"><button onClick={() => { showShop(); setMenuOpen(false); }}>Shop</button><button onClick={() => { showBag(); setMenuOpen(false); }}>Bag ({count})</button><div className="theme-switch mobile-theme-switch" role="group" aria-label="Choose a color theme"><button className={`theme-swatch swatch-ink ${theme === "ink" ? "selected" : ""}`} aria-label="Black on cream theme" aria-pressed={theme === "ink"} onClick={() => setTheme("ink")} /><button className={`theme-swatch swatch-market ${theme === "market" ? "selected" : ""}`} aria-label="Red on cream theme" aria-pressed={theme === "market"} onClick={() => setTheme("market")} /><button className={`theme-swatch swatch-night ${theme === "night" ? "selected" : ""}`} aria-label="Cream on black theme" aria-pressed={theme === "night"} onClick={() => setTheme("night")} /></div></div>}
+      {menuOpen && (
+        <div className="mobile-menu-panel">
+          <button onClick={() => { showShop(); setMenuOpen(false); }}>Shop</button>
+          <button onClick={() => { showBag(); setMenuOpen(false); }}>Bag ({count})</button>
+          {currentUser ? (
+            <div className="mobile-menu-auth-group">
+              <Link className="mobile-auth-link" href="/account" onClick={() => setMenuOpen(false)}>
+                My Account ({currentUser.name.split(" ")[0]}) <span>↗</span>
+              </Link>
+              <button onClick={() => { handleLogout(); setMenuOpen(false); }}>Logout</button>
+            </div>
+          ) : (
+            <div className="mobile-menu-auth-group">
+              <Link className="mobile-auth-link" href="/login" onClick={() => setMenuOpen(false)}>Sign In <span>→</span></Link>
+              <Link className="mobile-auth-link" href="/register" onClick={() => setMenuOpen(false)}>Sign Up <span>↗</span></Link>
+            </div>
+          )}
+          <div className="theme-switch mobile-theme-switch" role="group" aria-label="Choose a color theme">
+            <button className={`theme-swatch swatch-ink ${theme === "ink" ? "selected" : ""}`} aria-label="Black on cream theme" aria-pressed={theme === "ink"} onClick={() => setTheme("ink")} />
+            <button className={`theme-swatch swatch-market ${theme === "market" ? "selected" : ""}`} aria-label="Red on cream theme" aria-pressed={theme === "market"} onClick={() => setTheme("market")} />
+            <button className={`theme-swatch swatch-night ${theme === "night" ? "selected" : ""}`} aria-label="Cream on black theme" aria-pressed={theme === "night"} onClick={() => setTheme("night")} />
+          </div>
+        </div>
+      )}
 
       {bagOpen ? <section className="bag-page">
         <div className="giant-title-wrap"><h1 className="giant-title">YOUR BAG</h1></div>
@@ -90,7 +193,7 @@ export default function Home() {
             <div className="bag-page-quantity"><button onClick={() => changeQuantity(product.id, -1)} aria-label={`Remove one ${product.name}`}>−</button><span>{cart[product.id]}</span><button onClick={() => changeQuantity(product.id, 1)} aria-label={`Add one ${product.name}`}>+</button></div>
             <div className="bag-row-rule" />
           </article>)}</div>
-          <div className="bag-page-footer"><div><span>SUBTOTAL</span><strong>₹{total}</strong></div><p>Delivery options coming soon. This is a demo bag.</p><button onClick={() => notify("Your bag is ready for checkout")}>CHECKOUT <span>↗</span></button></div>
+          <div className="bag-page-footer"><div><span>SUBTOTAL</span><strong>₹{total}</strong></div><p>Delivery options coming soon. This is a demo bag.</p><button onClick={handleCheckout}>CHECKOUT <span>↗</span></button></div>
         </> : <div className="bag-page-empty"><p>Nothing in here just yet.</p><button onClick={showShop}>BACK TO THE SHELVES ↗</button></div>}
       </section> : selectedProduct ? <section className="product-page">
         <button className="return-link" onClick={showShop}>← RETURN TO SHOP</button>
@@ -114,7 +217,7 @@ export default function Home() {
         <footer className="footer"><div className="footer-rule"/><div className="footer-promise"><h2>Groceries at your door.<br/>In 45 minutes.</h2><span>©26</span></div><p className="footer-summary">Everyday essentials, little treats, and last-minute saves — delivered before you know it.</p><div className="footer-rule"/><div className="footer-grid"><div className="footer-brand-lockup"><img className="footer-brand-logo" src="/family-store-logo.png" alt="The Family Store"/><span>THE FAMILY STORE<br />EVERYDAY, EST. ALWAYS</span></div><div><span className="eyebrow">A LITTLE ABOUT US</span><p>Stocked with the familiar, the useful, and the little treats that make the day.</p></div><div className="footer-links"><a href="#shop">SHOP THE SHELVES</a><a href="/shipping-and-returns">SHIPPING &amp; RETURNS ↗</a><button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>BACK TO TOP ↑</button></div><span className="copyright">© 2026</span></div></footer>
       </>}
 
-      {count > 0 && <div className="mobile-checkout-bar"><div><span>{count} {count === 1 ? "ITEM" : "ITEMS"} IN YOUR BAG</span><strong>₹{total}</strong></div><button onClick={() => bagOpen ? notify("Your bag is ready for checkout") : showBag()}>CHECKOUT <span>↗</span></button></div>}
+      {count > 0 && <div className="mobile-checkout-bar"><div><span>{count} {count === 1 ? "ITEM" : "ITEMS"} IN YOUR BAG</span><strong>₹{total}</strong></div><button onClick={() => bagOpen ? handleCheckout() : showBag()}>CHECKOUT <span>↗</span></button></div>}
       {toast && <div className="toast" role="status">{toast}<span>✓</span></div>}
       {transition && <div className={`red-curtain ${transition}`} aria-hidden="true"><img src="/family-store-logo.png" alt="" /></div>}
     </main>

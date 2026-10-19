@@ -9,6 +9,7 @@ export default function ShippingAndReturnsPage() {
         </Link>
         <nav className="desktop-nav" aria-label="Main navigation">
           <Link className="nav-link" href="/#shop">Shop</Link>
+          <Link className="nav-link" href="/login">Sign In</Link>
         </nav>
         <Link className="policy-mobile-shop" href="/#shop">Shop</Link>
       </header>
