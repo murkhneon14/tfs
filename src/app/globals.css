@@ -187,4 +187,160 @@ body[data-theme="night"]{--paper:#080807;--red:#efe7df;--ink:#efe7df;--muted:#b2
   .account-card{border:0;box-shadow:none;padding:10px 0;background:transparent}
 }
 
+/* ==========================================================================
+   Admin Dashboard & Catalog Management Styles
+   ========================================================================== */
+.admin-shell{min-height:100vh;background:var(--paper);color:var(--ink);display:flex;flex-direction:column}
+.admin-topbar{height:76px;padding:0 var(--gutter);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:var(--paper);position:sticky;top:0;z-index:10}
+.admin-brand{display:flex;align-items:center;gap:12px}
+.admin-brand-tag{display:flex;flex-direction:column;gap:2px}
+.admin-pill{font:600 9px 'DM Mono',monospace;letter-spacing:.05em;background:var(--red);color:var(--paper);padding:2px 7px;border-radius:999px;width:max-content}
+.admin-site-name{font:500 12px 'DM Mono',monospace;color:var(--muted);text-transform:uppercase}
+.admin-nav{display:flex;align-items:center;gap:22px}
+.admin-nav-link{font:500 12px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.03em;color:var(--ink);padding:6px 0;position:relative;transition:color .2s}
+.admin-nav-link:hover{color:var(--red)}
+.admin-user-cluster{display:flex;align-items:center;gap:16px}
+.admin-view-store{font:500 11px 'DM Mono',monospace;color:var(--muted);text-transform:uppercase;border-bottom:1px solid currentColor;padding-bottom:1px}
+.admin-view-store:hover{color:var(--red)}
+.admin-user-badge{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:999px;padding:4px 4px 4px 12px;background:transparent}
+.admin-user-name{font:500 11px 'DM Mono',monospace;color:var(--ink);text-transform:uppercase}
+.admin-logout-btn{border:0;background:var(--red);color:var(--paper);border-radius:999px;padding:5px 12px;font:500 10px 'DM Mono',monospace;text-transform:uppercase;cursor:pointer;transition:background .2s}
+.admin-logout-btn:hover{background:var(--ink)}
+
+.admin-main{flex:1;padding:clamp(24px,3.5vw,48px) var(--gutter)}
+.admin-page-container{max-width:1180px;margin:0 auto}
+.admin-page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px;gap:18px;flex-wrap:wrap}
+.admin-title{font-family:'Oswald','DM Sans',sans-serif;font-size:clamp(30px,4.5vw,48px);line-height:1;margin:8px 0 0;letter-spacing:-.02em}
+.admin-header-actions{display:flex;align-items:center;gap:10px}
+.admin-back-crumb{font:500 11px 'DM Mono',monospace;text-transform:uppercase;color:var(--red);display:inline-block;margin-bottom:6px}
+.admin-back-crumb:hover{opacity:.8}
+
+.admin-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:9px 18px;font:500 11px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.025em;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.admin-btn:hover{border-color:var(--ink);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.admin-btn-solid{background:var(--red);border-color:var(--red);color:var(--paper)}
+.admin-btn-solid:hover{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.admin-btn:disabled{opacity:.5;cursor:not-allowed}
+.admin-link{font:500 11px 'DM Mono',monospace;color:var(--red);text-transform:uppercase;border-bottom:1px solid currentColor}
+.admin-link:hover{opacity:.8}
+
+/* Stat Cards */
+.admin-stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:28px}
+.admin-stat-card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:6px}
+.admin-stat-label{font:500 10px 'DM Mono',monospace;text-transform:uppercase;color:var(--muted)}
+.admin-stat-value{font-family:'Oswald','DM Sans',sans-serif;font-size:36px;line-height:1;color:var(--ink)}
+.admin-stat-sub{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* Section Cards & Tables */
+.admin-section-card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:24px;overflow:hidden}
+.admin-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:15px;flex-wrap:wrap}
+.admin-section-head h2{font-size:20px;font-weight:600;margin:0}
+.admin-table-wrap{overflow-x:auto}
+.admin-table{width:100%;border-collapse:collapse;font-size:13px;text-align:left}
+.admin-table th{font:500 10px 'DM Mono',monospace;text-transform:uppercase;color:var(--muted);padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+.admin-table td{padding:14px;border-bottom:1px solid color-mix(in srgb,var(--line) 40%,transparent);vertical-align:middle}
+.admin-table tr:last-child td{border-bottom:0}
+
+.admin-prod-cell,.admin-cat-cell{display:flex;align-items:center;gap:12px}
+.admin-prod-thumb,.admin-cat-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;background:var(--paper);border:1px solid var(--line);flex:none}
+.admin-prod-title-link strong{color:var(--ink);transition:color .2s}
+.admin-prod-title-link:hover strong{color:var(--red)}
+.admin-cell-sub{font:11px 'DM Mono',monospace;color:var(--muted);display:block;margin-top:2px}
+.admin-cell-date{font:11px 'DM Mono',monospace;color:var(--muted)}
+.admin-cell-price{font:600 13px 'DM Mono',monospace;color:var(--ink);white-space:nowrap}
+.admin-cat-pill{font:500 10px 'DM Mono',monospace;padding:3px 9px;border-radius:999px;background:color-mix(in srgb,var(--line) 30%,transparent);color:var(--ink);width:max-content;display:inline-block}
+.admin-variant-count{font:11px 'DM Mono',monospace;color:var(--muted)}
+.admin-erp-tag{font:10px 'DM Mono',monospace;background:color-mix(in srgb,var(--muted) 15%,transparent);padding:3px 7px;border-radius:6px;color:var(--ink)}
+
+.admin-status-badge,.admin-status-toggle{display:inline-flex;align-items:center;gap:5px;font:500 10px 'DM Mono',monospace;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid transparent;cursor:default}
+.admin-status-toggle{cursor:pointer;transition:transform .15s}
+.admin-status-toggle:hover{transform:scale(1.05)}
+.status-active{background:#2e7d3218;color:#2e7d32;border-color:#2e7d3240}
+.status-inactive{background:color-mix(in srgb,var(--muted) 15%,transparent);color:var(--muted);border-color:var(--line)}
+.admin-action-btn{font:500 11px 'DM Mono',monospace;text-transform:uppercase;color:var(--red);border-bottom:1px solid currentColor;padding-bottom:1px}
+.admin-action-btn:hover{opacity:.75}
+
+/* Filter Bar */
+.admin-filter-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+.admin-search-wrap{position:relative;flex:1;min-width:240px;max-width:440px}
+.admin-search-input{width:100%;border:1px solid var(--line);border-radius:999px;padding:9px 36px 9px 16px;background:var(--paper);color:var(--ink);font-size:13px;outline:0}
+.admin-search-input:focus{border-color:var(--red)}
+.admin-search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;font-size:16px;color:var(--muted);cursor:pointer}
+.admin-filter-controls{display:flex;align-items:center;gap:10px}
+.admin-select{border:1px solid var(--line);border-radius:999px;padding:9px 16px;background:var(--paper);color:var(--ink);font:500 11px 'DM Mono',monospace;text-transform:uppercase;outline:0}
+.admin-select:focus{border-color:var(--red)}
+
+/* Empty States & Notices */
+.admin-empty-state-card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:clamp(40px,6vw,70px) 20px;text-align:center;max-width:680px;margin:20px auto}
+.admin-empty-icon{font-size:42px;margin-bottom:12px}
+.admin-empty-state-card h2{font-size:24px;margin:0 0 8px;font-weight:600}
+.admin-empty-state-card p{color:var(--muted);font-size:14px;line-height:1.5;max-width:480px;margin:0 auto 20px}
+.admin-empty-actions{display:flex;justify-content:center;gap:12px}
+.admin-notice-box{border:1px dashed var(--line);border-radius:14px;padding:16px 20px;margin-top:28px;background:color-mix(in srgb,var(--paper) 50%,transparent)}
+.admin-notice-box .eyebrow{color:var(--muted);font-size:9px}
+.admin-notice-box p{margin:6px 0 0;font-size:12px;color:var(--muted);line-height:1.4}
+.admin-loading-card{padding:60px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--muted);font:500 11px 'DM Mono',monospace}
+.admin-spinner{width:24px;height:24px;border:2px solid var(--line);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Form Card */
+.admin-form-card{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:clamp(20px,4vw,36px)}
+.admin-fieldset{border:0;padding:0;margin:0 0 28px}
+.admin-legend{font:600 12px 'DM Mono',monospace;text-transform:uppercase;color:var(--red);letter-spacing:.04em;margin-bottom:18px;border-bottom:1px solid var(--line);padding-bottom:8px;width:100%}
+.admin-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.admin-field-group{display:flex;flex-direction:column;gap:6px}
+.admin-field-group.span-2{grid-column:span 2}
+.admin-field-group label{font:500 10px 'DM Mono',monospace;text-transform:uppercase;color:var(--muted)}
+.admin-hint{text-transform:none;color:var(--muted);font-weight:400}
+.admin-input,.admin-textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:var(--paper);color:var(--ink);font-size:13px;outline:0;font-family:inherit}
+.admin-input:focus,.admin-textarea:focus{border-color:var(--red)}
+.admin-textarea{resize:vertical}
+.admin-checkbox-group{display:flex;align-items:center;padding-top:14px}
+.admin-checkbox-label{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--ink);text-transform:none}
+.admin-form-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;border-top:1px solid var(--line);padding-top:22px;margin-top:10px}
+
+/* Color Picker */
+.admin-color-picker-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.admin-color-preview{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);flex:none}
+.admin-color-hex{width:110px}
+.admin-color-presets{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.admin-swatch{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);cursor:pointer;transition:transform .15s}
+.admin-swatch:hover{transform:scale(1.15)}
+.admin-swatch.selected{outline:2px solid var(--ink);outline-offset:1px}
+
+/* Collapsible */
+.admin-collapsible-group{margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:14px}
+.admin-collapsible-btn{width:100%;background:transparent;border:0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font:500 11px 'DM Mono',monospace;text-transform:uppercase;padding:0;color:var(--ink)}
+.admin-collapsible-body{margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+
+/* Modals */
+.admin-modal-backdrop{position:fixed;inset:0;background:rgba(21,19,17,.5);z-index:30;display:flex;align-items:center;justify-content:center;padding:20px;animation:fade-in .2s}
+.admin-modal-card{background:var(--paper);border:1px solid var(--line);border-radius:24px;width:min(680px,100%);max-height:90vh;overflow-y:auto;padding:28px;box-shadow:0 12px 40px #0003}
+.admin-modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;border-bottom:1px solid var(--line);padding-bottom:14px}
+.admin-modal-header h3{margin:0;font-size:20px;font-weight:600}
+.admin-modal-close{border:0;background:transparent;font-size:26px;line-height:1;cursor:pointer;color:var(--muted)}
+.admin-modal-close:hover{color:var(--ink)}
+
+/* Access Denied */
+.admin-access-denied{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--paper)}
+.admin-denied-card{background:var(--paper);border:1px solid var(--red);border-radius:24px;padding:clamp(30px,5vw,50px);max-width:520px;text-align:center}
+.admin-denied-card .eyebrow{color:var(--red)}
+.admin-denied-card h1{font-family:'Oswald','DM Sans',sans-serif;font-size:36px;margin:10px 0 14px;color:var(--red)}
+.admin-denied-card p{color:var(--ink);font-size:14px;line-height:1.5;margin-bottom:26px}
+.admin-denied-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+@media(max-width:850px){
+  .admin-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .admin-topbar{padding:0 16px;height:auto;padding-top:12px;padding-bottom:12px;flex-wrap:wrap;gap:10px}
+  .admin-nav{order:3;width:100%;border-top:1px solid var(--line);padding-top:8px;gap:16px}
+}
+@media(max-width:580px){
+  .admin-stats-grid{grid-template-columns:1fr}
+  .admin-form-grid{grid-template-columns:1fr}
+  .admin-field-group.span-2{grid-column:span 1}
+  .admin-filter-bar{flex-direction:column;align-items:stretch}
+  .admin-filter-controls{flex-wrap:wrap}
+  .admin-user-cluster .admin-view-store{display:none}
+}
+
+
 
