@@ -1,10 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, useRef, type CSSProperties, type SyntheticEvent } from "react";
 import Link from "next/link";
-import { products as fallbackProducts, type Product as BaseProduct } from "@/data/products";
-
-export type Product = BaseProduct & {
+import { createFallbackProductImage, getCatalogImageSource } from "@/lib/products/fallback-image";
+export type Product = {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  stock: number | null;
+  inventorySyncPending?: boolean;
+  image: string;
+  hoverImage?: string;
+  note: string;
+  color: string;
   slug?: string;
   variants?: Array<{
     id: string;
@@ -14,6 +23,12 @@ export type Product = BaseProduct & {
     sku: string;
   }>;
 };
+
+function handleProductImageError(event: SyntheticEvent<HTMLImageElement>, product: Product) {
+  const image = event.currentTarget;
+  if (image.src.startsWith("data:image/svg+xml")) return;
+  image.src = createFallbackProductImage(product);
+}
 
 type Cart = Record<string, number>;
 type Transition = "cover" | "reveal" | null;
@@ -46,13 +61,10 @@ export default function Home() {
   const [totalFinds, setTotalFinds] = useState(0);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   // Cache of all loaded products so cart items never get lost when switching category
-  const [knownProducts, setKnownProducts] = useState<Map<string, Product>>(() => {
-    const map = new Map<string, Product>();
-    for (const p of fallbackProducts) map.set(p.id, p);
-    return map;
-  });
+  const [knownProducts, setKnownProducts] = useState<Map<string, Product>>(() => new Map());
 
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -127,6 +139,7 @@ export default function Home() {
             setCategories(data.categories || []);
             setPage(1);
             setHasMore(data.page < data.totalPages);
+            setFetchError(null);
 
             // Register into product cache
             setKnownProducts((prev) => {
@@ -135,15 +148,18 @@ export default function Home() {
               return updated;
             });
           } else {
-            // Fallback to demo items if API empty
-            setCatalog(fallbackProducts);
-            setTotalFinds(fallbackProducts.length);
+            // Never fall back to mock catalog
+            setCatalog([]);
+            setTotalFinds(0);
+            setFetchError("No products found on the shelves.");
           }
         })
         .catch((err) => {
-          console.warn("Failed to fetch live products, using fallback:", err);
-          setCatalog(fallbackProducts);
-          setTotalFinds(fallbackProducts.length);
+          console.error("Failed to fetch live products from Supabase:", err);
+          // Never fall back to mock catalog on error
+          setCatalog([]);
+          setTotalFinds(0);
+          setFetchError("Unable to connect to the store catalog. Please check your connection.");
         })
         .finally(() => {
           setLoadingProducts(false);
@@ -209,6 +225,10 @@ export default function Home() {
   }
 
   function add(product: Product) {
+    if (!product || product.price <= 0) {
+      notify("Item unpriced. Cannot add to bag.");
+      return;
+    }
     setCart((current) => ({ ...current, [product.id]: (current[product.id] ?? 0) + 1 }));
     setToast(`${product.name} added to your bag`);
     window.setTimeout(() => setToast(""), 1800);
@@ -365,12 +385,9 @@ export default function Home() {
                     </div>
                     <button className="bag-delete" onClick={() => changeQuantity(product.id, -cart[product.id])}>Delete</button>
                     <img
-                      src={product.image}
+                      src={getCatalogImageSource(product)}
                       alt={product.name}
-                      onError={(event) => {
-                        event.currentTarget.onerror = null;
-                        event.currentTarget.src = "/product-placeholder.svg";
-                      }}
+                      onError={(event) => handleProductImageError(event, product)}
                     />
                     <div className="bag-page-quantity">
                       <button onClick={() => changeQuantity(product.id, -1)} aria-label={`Remove one ${product.name}`}>−</button>
@@ -401,22 +418,16 @@ export default function Home() {
             <div className="product-detail-photos">
               <div className="detail-photo">
                 <img
-                  src={selectedProduct.image}
+                  src={getCatalogImageSource(selectedProduct)}
                   alt={selectedProduct.name}
-                  onError={(event) => {
-                    event.currentTarget.onerror = null;
-                    event.currentTarget.src = "/product-placeholder.svg";
-                  }}
+                  onError={(event) => handleProductImageError(event, selectedProduct)}
                 />
               </div>
               <div className="detail-photo detail-photo-zoom">
                 <img
-                  src={selectedProduct.image}
+                  src={getCatalogImageSource(selectedProduct)}
                   alt={`${selectedProduct.name}, close-up`}
-                  onError={(event) => {
-                    event.currentTarget.onerror = null;
-                    event.currentTarget.src = "/product-placeholder.svg";
-                  }}
+                  onError={(event) => handleProductImageError(event, selectedProduct)}
                 />
               </div>
             </div>
@@ -443,8 +454,12 @@ export default function Home() {
                 </div>
               )}
 
-              <div className="detail-stock">READY IN THE STORE</div>
-              <button className="detail-add" onClick={() => add(selectedProduct)}>
+              <div className="detail-stock">PHYSICAL INVENTORY PENDING SYNC (RANCELAB FR6)</div>
+              <button
+                className="detail-add"
+                onClick={() => add(selectedProduct)}
+                disabled={selectedProduct.price <= 0}
+              >
                 ADD TO BAG <span>↗</span>
               </button>
               <button className="detail-back" onClick={showShop}>KEEP LOOKING</button>
@@ -547,28 +562,22 @@ export default function Home() {
                     >
                       <div className="product-image-wrap">
                         <img
-                          src={product.image}
+                          src={getCatalogImageSource(product)}
                           alt={product.name}
                           className="product-image"
                           loading={index > 3 ? "lazy" : "eager"}
-                          onError={(event) => {
-                            event.currentTarget.onerror = null;
-                            event.currentTarget.src = "/product-placeholder.svg";
-                          }}
+                          onError={(event) => handleProductImageError(event, product)}
                         />
                         {product.hoverImage && (
                           <img
-                            src={product.hoverImage}
+                            src={getCatalogImageSource({ ...product, image: product.hoverImage })}
                             alt=""
                             className="product-image product-image-alt"
                             loading="lazy"
-                            onError={(event) => {
-                              event.currentTarget.onerror = null;
-                              event.currentTarget.src = "/product-placeholder.svg";
-                            }}
+                            onError={(event) => handleProductImageError(event, product)}
                           />
                         )}
-                        <span className="stock-tag">IN THE STORE</span>
+                        <span className="stock-tag">IN STORE</span>
                         <span className="view-more">VIEW<br />MORE <i>↗</i></span>
                         {cart[product.id] ? (
                           <div className="card-quantity" onClick={(event) => event.stopPropagation()}>
@@ -613,6 +622,12 @@ export default function Home() {
                   </div>
                 )}
               </>
+            ) : fetchError ? (
+              <div className="empty-results">
+                <span>CATALOG NOTICE</span>
+                <p>{fetchError}</p>
+                <button onClick={() => { setActiveCategory("all"); setQuery(""); }}>Refresh Shelves ↗</button>
+              </div>
             ) : (
               <div className="empty-results">
                 <span>NOT FOUND (YET)</span>
